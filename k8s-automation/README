@@ -5,4 +5,4 @@ URL - https://github.com/srinidevops95/k8s/new/main/k8s-automation
 1. The code is missing pod network which needs to be add after the setup.
 2. Because of this pod network missing, nodes will bot comes to ready state, so need to execute the below command on master node
 
-kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+
