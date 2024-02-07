@@ -1,0 +1,7 @@
+# This is the setup code for deploying k8s on ubuntu using kubeadm
+
+#The code is missing *pod network which needs to be add after the setup.
+
+# Because of this pod network missing, nodes will bot comes to ready state, so need to execute the below command on master node
+
+kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml

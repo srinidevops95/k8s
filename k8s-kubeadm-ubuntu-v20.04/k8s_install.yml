@@ -1,0 +1,61 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+  become_user: root
+  gather_facts: yes
+  connection: ssh
+
+  tasks:
+    - name: Disable firewall
+      shell: |
+              sudo ufw disable
+    
+    - name: disable swap
+      shell: |
+              sudo swapoff -a
+               sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+    - name: set hostname
+      shell: |
+              sudo hostnamectl set-hostname `echo $(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | tail -n 1)`
+     
+    - name: Create k8s networking file
+      file:
+        path: /etc/sysctl.d/kubernetes.conf
+        state: touch      
+
+    - name: Add conf for containerd
+      blockinfile:
+         path: "/etc/sysctl.d/kubernetes.conf"
+         block: |
+                net.bridge.bridge-nf-call-iptables = 1
+                net.bridge.bridge-nf-call-ip6tables = 1
+
+    - name: Apply new settings
+      command: sudo sysctl --system
+
+    - name: install certificate 
+      shell: |
+              apt install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+    - name: add repo 
+      apt_repository:
+         repo: deb https://download.docker.com/linux/ubuntu focal stable
+         state: present
+              
+    - name: install docker engine
+      shell: | 
+              sudo apt-get update -y
+              sudo apt-get install -y docker-ce=5:19.03.10~3-0~ubuntu-focal containerd.io
+
+    - name: add kubernetes repo
+      shell: |
+             curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+             echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
+
+    - name: install kubernetes components
+      shell: |
+              apt update && apt install -y kubeadm=1.18.5-00 kubelet=1.18.5-00 kubectl=1.18.5-00      

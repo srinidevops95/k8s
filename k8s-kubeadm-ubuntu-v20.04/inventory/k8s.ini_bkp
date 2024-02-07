@@ -1,0 +1,16 @@
+
+#[master]
+master ansible_ssh_host="{{ mip }}" ansible_ssh_user=k8s ansible_ssh_pass=welcome
+
+#[workers]
+worker1 ansible_ssh_host="{{ w1_eip }}" ansible_ssh_user=k8s ansible_ssh_pass=welcome
+worker2 ansible_ssh_host="{{ w2_eip }}" ansible_ssh_user=k8s ansible_ssh_pass=welcome
+
+[all]
+master
+worker1
+worker2
+
+[worker]
+worker1
+worker2
